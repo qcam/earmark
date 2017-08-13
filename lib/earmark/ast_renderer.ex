@@ -33,8 +33,8 @@ defmodule Earmark.AstRenderer do
   """
   def render_ast({_, %Context{}} = parsed) do
     case _render_ast( parsed, @empty_ast ) do
-      { triples, [] }     -> {:ok, triples, []}
-      { triples, errors } -> {:error, triples, errors}
+      { triples, [] }     -> {:ok, Enum.reverse(triples), []}
+      { triples, errors } -> {:error, Enum.reverse(triples), errors}
     end
   end
 
@@ -46,8 +46,9 @@ defmodule Earmark.AstRenderer do
   end
 
   @spec _render_block( Block.t ) :: result
-  defp _render_block(block) do 
-    {{"p", [], ["line1"]}, []}
+  defp _render_block(block) 
+  defp _render_block(%Block.Para{}=para) do 
+    {{"p", [], para.lines}, []}
   end
 
   defp add_to_result({triples, errors}, {triples1, errors1}) do
