@@ -323,14 +323,16 @@ defmodule Earmark do
   end
 
   @doc """
-  Given a markdown document (as either a list of lines or
-  a string containing newlines), return a parse tree and
-  the context necessary to render the tree.
-
-  The options are a `%Earmark.Options{}` structure. See `as_html!`
-  for more details.
+  N.B: EXPERIMENTAL API, might change with patch releases!
+  Renders the parsed markdown document as an AST, very much HTML style.
+  TODO: Doctest examples
   """
+  def as_ast(markdown, options \\ %Options{}) do
+    parse(markdown, options)
+    |> Earmark.AstRenderer.render_ast
+  end
 
+  @doc false
   @spec parse(String.t | list(String.t), %Options{}) :: { Earmark.Block.ts, %Context{} }
   def parse(lines, options \\ %Earmark.Options{})
   def parse(lines, options = %Options{mapper: mapper}) when is_list(lines) do

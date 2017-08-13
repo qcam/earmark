@@ -3,6 +3,8 @@ defmodule Earmark.Context do
   use Earmark.Types
   import Earmark.Helpers
 
+  @type t :: %__MODULE__{}
+
   defstruct options:  %Earmark.Options{},
             links:    Map.new,
             rules:    nil,
