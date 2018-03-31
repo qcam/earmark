@@ -36,6 +36,7 @@ defmodule Earmark.Scanner do
   @type t_continuation :: {token, String.t, boolean()}
 
 
+  @spec scan_line( String.t ) :: tokens
   @doc """
   Scans a line into a list of tokens
   """
@@ -44,6 +45,7 @@ defmodule Earmark.Scanner do
     |> Enum.reverse
   end
 
+  @spec scan_line_into_tokens( String.t, tokens, boolean() ) :: tokens
   # Empty Line
   defp scan_line_into_tokens "", [], _beg do
     []
@@ -56,6 +58,7 @@ defmodule Earmark.Scanner do
     scan_line_into_tokens( rest, [token|tokens], still_at_beg )
   end
 
+  @spec scan_next_token( String.t, boolean ) :: false | t_continuation
   defp scan_next_token line, beg_of_line
   defp scan_next_token line, true do
     cond do
@@ -102,6 +105,7 @@ defmodule Earmark.Scanner do
     |> Tuple.append( false )
   end
 
+  @spec scan_token_not_at_beg( String.t ) :: {} | t_continuation
   defp scan_token_not_at_beg line do
     cond do
       matches = Regex.run( @backtix_rgx, line ) ->
@@ -119,6 +123,7 @@ defmodule Earmark.Scanner do
     end
   end
 
+  @spec make_ruler_from( String.t ) :: token
   defp make_ruler_from type do
     case type do
       "*" -> %RulerFat{}
@@ -127,6 +132,7 @@ defmodule Earmark.Scanner do
     end
   end
 
+  @spec make_list_item( String.t ) :: %ListItem{}
   defp make_list_item bullet do
     case bullet do
       "*" -> %ListItem{type: :ul, bullet: "*"}
@@ -135,6 +141,7 @@ defmodule Earmark.Scanner do
     end
   end
 
+  @spec prefixed_with_ws(String.t, String.t) :: false | { %Text{}, String.t, true}
   defp prefixed_with_ws line, ws do
     if ws == "" do
       false

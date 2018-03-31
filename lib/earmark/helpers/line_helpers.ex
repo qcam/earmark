@@ -2,6 +2,7 @@ defmodule Earmark.Helpers.LineHelpers do
 
   alias Earmark.Line
 
+  @spec blank?(Line.t) :: boolean
   def blank?(%Line.Blank{}),   do: true
   def blank?(_),               do: false
 
