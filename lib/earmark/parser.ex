@@ -21,7 +21,7 @@ defmodule Earmark.Parser do
   # Traverse the block list and extract the footnote definitions #
   ################################################################
 
-  # @spec handle_footnotes( Block.ts, Options.t, map_fn_t(Block.ts, list) :: { Block.ts, Block.ts, Options.t }
+  # @spec handle_footnotes( Block.ts, Options.t, (Block.ts, _ ) ) :: { Block.ts, Block.ts, Options.t }
   def handle_footnotes(blocks, options, map_func) do
     { footnotes, blocks } = Enum.split_with(blocks, &footnote_def?/1)
     { footnotes, undefined_footnotes } =
