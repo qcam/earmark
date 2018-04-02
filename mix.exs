@@ -5,7 +5,9 @@ defmodule Earmark.Mixfile do
 
   @deps  [
     { :credo,    "~> 0.8", only: [ :dev, :test ] },
-    { :dialyxir, "~> 0.5", only: [ :dev, :test ] },
+    { :dialyxir, "~> 0.5.1", only: [ :dev, :test ] },
+    # { :dialyxir, path: "/home/robert/gh/elixir/dialyxir", only: [ :dev, :test ] },
+    # { :dialyxir, path: "/home/robert/gh/elixir/asummers_dialyxir", only: [ :dev, :test ] },
   ]
 
   @description """
@@ -30,7 +32,8 @@ defmodule Earmark.Mixfile do
       deps:          @deps,
       description:   @description,
       package:       package(),
-      aliases:       [docs: &docs/1, readme: &readme/1]
+      aliases:       [docs: &docs/1, readme: &readme/1],
+      dialyzer:      [ignore_warnings: "dialyzer.ignore-warnings"]
     ]
   end
 

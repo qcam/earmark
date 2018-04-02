@@ -67,7 +67,7 @@ defmodule Earmark.Parser do
     end)
   end
 
-  @spec create_footnote_blocks(Block.ts, Block.ts) :: Block.ts
+  # @spec create_footnote_blocks(Block.ts, Block.ts) :: Block.ts
   defp create_footnote_blocks(blocks, []), do: blocks
 
   defp create_footnote_blocks(blocks, footnotes) do

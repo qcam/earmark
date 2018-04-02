@@ -14,7 +14,7 @@ defmodule Earmark.Helpers.LookaheadHelpers do
 
   Otherwise `{nil, 0}` is returned
   """
-  @spec opens_inline_code(numbered_line) :: inline_code_continuation
+  @spec opens_inline_code(Line.t) :: inline_code_continuation
   def opens_inline_code( %{line: line, lnb: lnb} ) do
     case tokenize(line, with: :string_lexer) |> has_still_opening_backtix(nil) do
       nil      -> {nil, 0}
@@ -70,20 +70,24 @@ defmodule Earmark.Helpers.LookaheadHelpers do
     _read_list_lines(lines, [], %{pending: pending, pending_lnb: pending_lnb, min_indent: nil, initial_indent: initial_indent})
   end
 
-  @type read_list_info :: %{pending: maybe(String.t), pending_lnb: number, initial_indent: number, min_indent: maybe(number)}
+  @typep read_list_info :: %{
+    required(:pending) => maybe(String.t),
+    required(:pending_lnb) => number,
+    required(:initial_indent) => number,
+    optional(:min_indent) => maybe(number)}
 
-  @spec _read_list_lines(Line.ts, Line.ts, read_list_info) :: {boolean, Line.ts, Line.ts, number}
+  @spec _read_list_lines(any(), Line.ts, read_list_info) :: {boolean, Line.ts, Line.ts, number}
   # List items with initial_indent + 2
   defp _read_list_lines([ line = %Line.ListItem{initial_indent: li_indent} | rest ], result,
-    params=%{pending: nil, initial_indent: initial_indent, min_indent: min_indent})
+  params=%{pending: nil, initial_indent: initial_indent, min_indent: min_indent})
   when li_indent > initial_indent + 1 do
     with {pending1, pending_lnb1} = opens_inline_code(line),
-         min_indent1 = new_min_indent(min_indent, 2), do:
+    min_indent1 = new_min_indent(min_indent, 2), do:
     _read_list_lines(rest, [ line | result ], %{params | pending: pending1, pending_lnb: pending_lnb1, min_indent: min_indent1})
   end
   # List items with same indent than last one
   defp _read_list_lines([ line = %Line.ListItem{initial_indent: li_indent} | rest ], res=[%Line.ListItem{initial_indent: old_indent} | _],
-    params=%{pending: nil})
+  params=%{pending: nil})
   when li_indent == old_indent do
     with {pending1, pending_lnb1} = opens_inline_code(line), do:
     _read_list_lines(rest, [ line | res ], %{params | pending: pending1, pending_lnb: pending_lnb1, min_indent: li_indent})
@@ -131,13 +135,13 @@ defmodule Earmark.Helpers.LookaheadHelpers do
   end
 
   defp _read_list_lines([ line = %Line.Indent{level: indent_level} | rest ], result,
-    params=%{pending: nil, min_indent: min_indent}) do
+  params=%{pending: nil, min_indent: min_indent}) do
     with min_indent1 = new_min_indent(min_indent, indent_level * 4), do:
     _read_list_lines(rest, [ line | result ], %{params | min_indent: min_indent1})
   end
 
   defp _read_list_lines([ line = %Line.Text{line: <<"  ", _ :: binary>>} | rest ],
-    result, params=%{pending: nil})
+  result, params=%{pending: nil})
   do
     _read_list_lines(rest, [ line | result ], _opens_inline_code(line, params))
   end
@@ -168,7 +172,7 @@ defmodule Earmark.Helpers.LookaheadHelpers do
   # Convenience wrapper around `opens_inline_code` into a map
   defp _opens_inline_code( line, params ) do
     with {pending, pending_lnb} = opens_inline_code(line), do:
-      %{ params | pending: pending, pending_lnb: pending_lnb }
+    %{ params | pending: pending, pending_lnb: pending_lnb }
   end
 end
 

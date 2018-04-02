@@ -8,7 +8,9 @@ defmodule Earmark.Types do
       @type message_type :: :warning | :error
       @type message :: {message_type, number, String.t}
       @type maybe(t) :: t | nil
-      @type inline_code_continuation :: {nil | String.t, number}
+      @type inline_code_continuation :: {maybe(String.t), number}
+
+      @type triplet(t) :: {t, t, t}
     end
   end
 
