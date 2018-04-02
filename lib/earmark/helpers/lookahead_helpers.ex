@@ -58,7 +58,7 @@ defmodule Earmark.Helpers.LookaheadHelpers do
   #######################################################################################
   # read_list_lines
   #######################################################################################
-  @spec read_list_lines( Line.ts, inline_code_continuation, number ) :: {boolean, Line.ts, Line.ts, number, number}
+  # @spec read_list_lines( Line.ts, inline_code_continuation, number ) :: {boolean, Line.ts, Line.ts, number, number}
   @doc """
   Called to slurp in the lines for a list item.
   basically, we allow indents and blank lines, and
@@ -76,7 +76,7 @@ defmodule Earmark.Helpers.LookaheadHelpers do
     required(:initial_indent) => number,
     optional(:min_indent) => maybe(number)}
 
-  @spec _read_list_lines(any(), Line.ts, read_list_info) :: {boolean, Line.ts, Line.ts, number}
+  # @spec _read_list_lines(any(), Line.ts, read_list_info) :: {boolean, Line.ts, Line.ts, number}
   # List items with initial_indent + 2
   defp _read_list_lines([ line = %Line.ListItem{initial_indent: li_indent} | rest ], result,
   params=%{pending: nil, initial_indent: initial_indent, min_indent: min_indent})

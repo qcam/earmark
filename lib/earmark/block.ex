@@ -52,7 +52,7 @@ defmodule Earmark.Block do
   # for external consumption.
 
   # @spec parse( Line.ts, Options.t ) :: {ts, %{}, %{}}
-#  @spec parse( Line.ts, Options.t ) :: {ts, %{}, any()}
+  @spec parse( Line.ts, Options.t ) :: {ts, %{}, any()}
   def parse(lines, options) do
     {blocks, options} = lines |> remove_trailing_blank_lines() |> lines_to_blocks(options)
     links  = links_from_blocks(blocks)
