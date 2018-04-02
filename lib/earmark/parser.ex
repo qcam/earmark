@@ -1,11 +1,14 @@
 defmodule Earmark.Parser do
 
-  alias Earmark.Line
+  use Earmark.Types
+
   alias Earmark.Block
+  alias Earmark.Line
+  alias Earmark.Options
   import Earmark.Message, only: [add_messages: 2]
 
 
-  @spec parse(list(String.t), %Earmark.Options{}, boolean) :: {Block.ts(), %{}}
+  @spec parse(list(String.t), Options.t, boolean) :: {Block.ts(), map(), Options.t}
   def parse(text_lines), do: parse(text_lines, %Earmark.Options{}, false)
 
   def parse(text_lines, options = %Earmark.Options{}, recursive) do
@@ -18,7 +21,7 @@ defmodule Earmark.Parser do
   # Traverse the block list and extract the footnote definitions #
   ################################################################
 
-  # @spec handle_footnotes( Block.ts, %Earmark.Options{}, ( Block.ts,
+  # @spec handle_footnotes( Block.ts, Options.t, map_fn_t(Block.ts, list) :: { Block.ts, Block.ts, Options.t }
   def handle_footnotes(blocks, options, map_func) do
     { footnotes, blocks } = Enum.split_with(blocks, &footnote_def?/1)
     { footnotes, undefined_footnotes } =
@@ -54,7 +57,7 @@ defmodule Earmark.Parser do
   end
 
 
-  @spec get_footnote_numbers( list({String.t, number()} ), Block.ts, %Earmark.Options{} ) :: Block.ts
+  @spec get_footnote_numbers( list({String.t, number()} ), Block.ts, %Earmark.Options{} ) :: pair(Block.ts)
   def get_footnote_numbers(refs, footnotes, options) do
     Enum.reduce(refs, {[], []}, fn({ref, lnb}, {defined, undefined}) ->
       r = hd(ref)

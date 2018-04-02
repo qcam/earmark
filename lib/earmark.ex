@@ -394,7 +394,7 @@ defmodule Earmark do
   end
 
   @doc false
-#  @spec pmap( list(A), (A -> Earmark.Line.t) ) :: Earmark.Line.ts
+  @spec pmap( list(A), (A -> Earmark.Line.t) ) :: Earmark.Line.ts
   def pmap(collection, func) do
    collection
     |> Enum.map(fn item -> Task.async(fn -> func.(item) end) end)

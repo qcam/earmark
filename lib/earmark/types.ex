@@ -10,6 +10,9 @@ defmodule Earmark.Types do
       @type maybe(t) :: t | nil
       @type inline_code_continuation :: {maybe(String.t), number}
 
+      @type map_fn_t(t,u) :: (t -> u)
+
+      @type pair(t)    :: {t, t}
       @type triplet(t) :: {t, t, t}
     end
   end

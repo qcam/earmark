@@ -237,9 +237,12 @@ defmodule Earmark.Line do
   end
 
 
-  @block_tags ~w< address article aside blockquote canvas dd div dl fieldset figcaption h1 h2 h3 h4 h5 h6 header hgroup li main nav noscript ol output p pre section table tfoot ul video> |>
-    Enum.into( MapSet.new() )
-  defp block_tag?(tag), do: MapSet.member?(@block_tags, tag)
+  @block_tags ~w< address article aside blockquote canvas dd div dl fieldset figcaption h1 h2 h3 h4 h5 h6 header hgroup li main nav noscript ol output p pre section table tfoot ul video> 
+  @spec block_tags( ) :: MapSet.t(String.t)
+  defp block_tags, do: @block_tags |> Enum.into( MapSet.new() )
+
+  @spec block_tag?( String.t ) :: boolean()
+  defp block_tag?(tag), do: MapSet.member?(block_tags(), tag)
 
   defp split_table_columns(line) do
     line
