@@ -1,5 +1,7 @@
 defmodule Earmark.Helpers.LinkParser do
 
+  use Earmark.Types
+
   import Earmark.Helpers.LeexHelpers, only: [tokenize: 2]
   import Earmark.Helpers.YeccHelpers, only: [parse!: 2]
   import Earmark.Helpers.StringHelpers, only: [behead: 2]
@@ -75,6 +77,7 @@ defmodule Earmark.Helpers.LinkParser do
 
   # sic!!! Greedy and not context aware, matching '..." and "...' for backward comp
   @title_end_rgx ~r{\s+['"](.*)['"](?=\))}
+  @spec title( String.t, number() ) :: maybe(triplet(String.t))
   defp title(remaining_text, lnb) do
     case Regex.run(@title_end_rgx, remaining_text) do
       nil             -> nil

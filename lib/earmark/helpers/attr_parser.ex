@@ -5,14 +5,15 @@ defmodule Earmark.Helpers.AttrParser do
 
   alias Earmark.Context
 
-  @type errorlist :: list(String.t)
+  @typep errorlist :: list(String.t)
 
-  @spec parse_attrs(Context.t, String.t, number()) :: {map, errorlist}
+  @spec parse_attrs(any(), String.t, number()) :: {errorlist, map()}
   def parse_attrs(context, attrs, lnb) do
     { attrs, errors } = _parse_attrs(%{}, attrs, [], lnb)
     { add_errors(context, errors, lnb), attrs }
   end
 
+  @spec _parse_attrs( map(), String.t, errorlist, number() ) :: {map(), errorlist}
   defp _parse_attrs(dict, attrs, errors, lnb) do
     cond do
       Regex.match?(~r{^\s*$}, attrs) -> {dict, errors}
