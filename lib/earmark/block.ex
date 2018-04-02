@@ -38,6 +38,7 @@ defmodule Earmark.Block do
   defmodule Table do
     defstruct lnb: 0, attrs: nil, rows: [], header: nil, alignments: []
 
+    @spec new_for_columns(pos_integer) :: %__MODULE__{}
     def new_for_columns(n) do
       %__MODULE__{alignments: Elixir.List.duplicate(:left, n)}
     end
@@ -51,8 +52,7 @@ defmodule Earmark.Block do
   # Then extract any id definitions, and build a map from them. Not
   # for external consumption.
 
-  # @spec parse( Line.ts, Options.t ) :: {ts, %{}, %{}}
-  @spec parse( Line.ts, Options.t ) :: {ts, %{}, any()}
+  @spec parse( Line.ts, Options.t ) :: {ts, %{}, Options.t}
   def parse(lines, options) do
     {blocks, options} = lines |> remove_trailing_blank_lines() |> lines_to_blocks(options)
     links  = links_from_blocks(blocks)
@@ -61,6 +61,7 @@ defmodule Earmark.Block do
 
   @doc false
   # Public to allow easier testing
+  @spec lines_to_blocks( Line.ts, Options.t ) :: { ts, Options.t }
   def lines_to_blocks(lines, options) do
     with {blocks, options1} <- lines |> _parse([], options) do
       { blocks |> assign_attributes_to_blocks([]) |> consolidate_list_items([]), options1 }
@@ -68,7 +69,7 @@ defmodule Earmark.Block do
   end
 
 
-#  @spec _parse(Line.ts, ts, %{}) :: {ts, Earmark.Message.ts}
+  @spec _parse(Line.ts, ts, Options.t) :: {ts, Options.t}
   defp _parse([], result, options), do: {result, options}
 
   ###################
@@ -127,7 +128,7 @@ defmodule Earmark.Block do
   # Table #
   #########
 
-  defp _parse( lines = [ %Line.TableLine{columns: cols1, lnb: lnb1},
+  defp _parse( lines = [ %Line.TableLine{columns: cols1, lnb: lnb},
                         %Line.TableLine{columns: cols2}
                       | _rest
                       ], result, options)
@@ -135,7 +136,7 @@ defmodule Earmark.Block do
   do
     columns = length(cols1)
     { table, rest } = read_table(lines, columns, Table.new_for_columns(columns))
-    table1          = %{table | lnb: lnb1}
+    table1          = %{table | lnb: lnb}
     _parse(rest, [ table1 | result ], options)
   end
 
@@ -334,7 +335,7 @@ defmodule Earmark.Block do
   # Assign attributes that follow a block to that block #
   #######################################################
 
-#  @spec assign_attributes_to_blocks( ts, ts ) :: ts
+  @spec assign_attributes_to_blocks( ts, ts ) :: ts
   def assign_attributes_to_blocks([], result), do: Enum.reverse(result)
 
   def assign_attributes_to_blocks([ %Ial{attrs: attrs}, block | rest], result) do
@@ -349,11 +350,10 @@ defmodule Earmark.Block do
   # Consolidate multiline inline code blocks into an element #
   ############################################################
   @not_pending {nil, 0}
-  # ([#{},...]) -> {[#{}],[#{}],{'nil' | binary(),number()}}
   @spec consolidate_para( ts ) :: { ts, ts, inline_code_continuation }
   defp consolidate_para( lines ), do: _consolidate_para( lines, [], @not_pending )
 
-#  @spec _consolidate_para( ts, ts, inline_code_continuation ) :: { ts, ts, inline_code_continuation }
+  @spec _consolidate_para( ts, ts, inline_code_continuation ) :: { ts, ts, inline_code_continuation }
   defp _consolidate_para( [], result, pending ) do
     {result, [], pending}
   end
@@ -370,7 +370,7 @@ defmodule Earmark.Block do
   # Consolidate one or more list items into a list #
   ##################################################
 
-#  @spec consolidate_list_items( ts, ts ) :: ts
+  @spec consolidate_list_items( ts, ts ) :: ts
   defp consolidate_list_items([], result) do
     result |> Enum.map(&compute_list_spacing/1)  # no need to reverse
   end
@@ -393,6 +393,7 @@ defmodule Earmark.Block do
     consolidate_list_items(rest, [ head | result ])
   end
 
+  @spec compute_list_spacing(t) :: t
   defp compute_list_spacing( list = %List{blocks: items} ) do
     with spaced = any_spaced_items?(items),
          unified_items = Enum.map(items, &(%{&1 | spaced: spaced}))
@@ -402,6 +403,7 @@ defmodule Earmark.Block do
   end
   defp compute_list_spacing( anything_else ), do: anything_else # nop
 
+  @spec any_spaced_items?( ts ) :: boolean
   defp any_spaced_items?([]), do: false
   defp any_spaced_items?([%{spaced: true}|_]), do: true
   defp any_spaced_items?([_|tail]), do: any_spaced_items?(tail)
@@ -411,7 +413,7 @@ defmodule Earmark.Block do
   # Read in a table (consecutive TableLines with
   # the same number of columns)
 
-#  @spec read_table( ts, number, %Table{} ) :: { %Table{}, ts }
+  @spec read_table( Line.ts, non_neg_integer, %Table{} ) :: { %Table{}, Line.ts }
   defp read_table([ %Line.TableLine{columns: cols} | rest ],
                     col_count,
                     table = %Table{})
@@ -433,7 +435,8 @@ defmodule Earmark.Block do
   end
 
 
-#  @spec look_for_alignments( [String.t] ) :: atom
+  @typep alignment_t :: maybe( :center | :left | :right )
+  @spec look_for_alignments( list(String.t) ) :: alignment_t
   defp look_for_alignments([ _first, second | _rest ]) do
     if Enum.all?(second, fn row -> row =~ ~r{^:?-+:?$} end) do
       second
@@ -460,7 +463,7 @@ defmodule Earmark.Block do
     visit(blocks, Map.new, &link_extractor/2)
   end
 
-#  @spec link_extractor(t, %{}) :: %{}
+  @spec link_extractor(t, %{}) :: %{}
   defp link_extractor(item = %IdDef{id: id}, result) do
     Map.put(result, String.downcase(id), item)
   end

@@ -1,6 +1,9 @@
 defmodule Earmark.Line do
 
+  use Earmark.Types
+
   alias Earmark.Helpers
+  alias Earmark.Options
 
   @moduledoc """
   Give a line of text, return its context-free type. Not for external consumption
@@ -75,17 +78,19 @@ defmodule Earmark.Line do
   # proceeding
 
   # (_,atom() | tuple() | #{},_) -> ['Elixir.B']
-  @spec scan_lines( list(String.t), %Earmark.Options{}, boolean ) :: ts
+  # @spec scan_lines( list(String.t), any, boolean ) :: ts
   def scan_lines lines, options \\ %Earmark.Options{}, recursive \\ false
   def scan_lines lines, options, recursive do
     lines_with_count( lines, options.line - 1)
     |> Earmark.pmap( fn (line) ->  type_of(line, options, recursive) end)
   end
 
+  @spec lines_with_count(list(String.t), non_neg_integer) :: list(numbered_line_tuple)
   defp lines_with_count lines, offset do
     Enum.zip lines, offset..(offset+Enum.count(lines))
   end
 
+  @spec type_of(numbered_line_tuple, boolean) :: t
   def type_of(line, recursive)
   when is_boolean(recursive), do: type_of(line, %Earmark.Options{}, recursive)
 
