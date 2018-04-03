@@ -1,17 +1,20 @@
 defmodule Earmark.Context do
 
   use Earmark.Types
+
+  alias Earmark.Options
+
   import Earmark.Helpers
 
   @type t :: %__MODULE__{
-    options: Earmark.Options.t,
+    options: Options.t,
     links: map(),
     rules: Keyword.t() | nil,
     footnotes: map(),
     value: String.t | [String.t]
   }
 
-  defstruct options:  %Earmark.Options{},
+  defstruct options:  %Options{},
   links:    Map.new,
   rules:    nil,
   footnotes: Map.new,
@@ -21,23 +24,28 @@ defmodule Earmark.Context do
   # Handle adding option specific rules and processors                         #
   ##############################################################################
 
+  @spec noop( String.t ) :: String.t
   defp noop(text), do: text
 
   @doc """
   Convenience method to append to the value list
   """
+  @spec append( t, any ) :: t
   def append(%__MODULE__{value: value} = ctx, prep), do: %{ctx | value: [value | prep]}
   @doc """
   Convenience method to prepend to the value list
   """
+  @spec  prepend( t, any ) :: t
   def prepend(%__MODULE__{value: value} = ctx, prep), do: %{ctx | value: [prep | value]}
   @doc """
   Convenience method to prepend to the value list
   """
+  @spec set_value( t, any ) :: t
   def set_value(%__MODULE__{} = ctx, value), do: %{ctx | value: value}
   @doc """
   Convenience method to get a context with cleared value and messages
   """
+  @spec clear( t ) :: t
   def clear(%__MODULE__{} = ctx) do
     with empty_value <- set_value(ctx, []) do
       %{empty_value | options: %{ empty_value.options | messages: []}}
@@ -47,6 +55,7 @@ defmodule Earmark.Context do
   @doc false
   # this is called by the command line processor to update
   # the inline-specific rules in light of any options
+  @spec   update_context( t ) :: t
   def update_context(context =  %Earmark.Context{options: options}) do
     context = %{ context | rules: rules_for(options) }
     context = if options.smartypants do
@@ -75,6 +84,7 @@ defmodule Earmark.Context do
     }xs
 
 
+    @spec basic_rules() :: Keyword.t(Regex.t)
     defp basic_rules do
       [
         escape:   ~r{^\\([\\`*\{\}\[\]()\#+\-.!_>])},
@@ -101,6 +111,7 @@ defmodule Earmark.Context do
       ]
     end
 
+    @spec rules_for( Options.t ) :: map
     defp rules_for(options) do
       rule_updates = if options.gfm do
         rules = [
@@ -136,6 +147,7 @@ defmodule Earmark.Context do
 
     # Smartypants transformations convert quotes to the appropriate curly
     # variants, and -- and ... to – and …
+    @spec smartypants( String.t ) :: String.t
     defp smartypants(text) do
       text
       |> replace(~r{--}, "—")
