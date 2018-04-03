@@ -85,7 +85,7 @@ defmodule Earmark.Line do
     |> Earmark.pmap( fn (line) ->  type_of(line, options, recursive) end)
   end
 
-  @spec lines_with_count(list(String.t), non_neg_integer) :: list(numbered_line_tuple)
+  @spec lines_with_count(list(String.t), non_neg_integer) :: numbered_line_tuples
   defp lines_with_count lines, offset do
     Enum.zip lines, offset..(offset+Enum.count(lines))
   end

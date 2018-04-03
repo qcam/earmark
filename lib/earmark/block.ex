@@ -360,8 +360,8 @@ defmodule Earmark.Block do
 
   defp _consolidate_para( [line | rest] = lines, result, pending ) do
     case inline_or_text?( line, pending ) do
-      %{pending: still_pending, continue: true} -> _consolidate_para( rest, [line | result], still_pending )
-      _                                         -> {result, lines, @not_pending}
+      {still_pending, true} -> _consolidate_para( rest, [line | result], still_pending )
+      _                     -> {result, lines, @not_pending}
     end
 
   end
@@ -533,6 +533,7 @@ defmodule Earmark.Block do
   # Plugin related #
   ##################
 
+  @spec collect_plugin_lines( Line.ts, String.t, numbered_line_tuples ) :: {numbered_line_tuples, Line.ts}
   defp collect_plugin_lines(lines, prefix, result)
   defp collect_plugin_lines([], _, result), do: {Enum.reverse(result), []}
   defp collect_plugin_lines([%Line.Plugin{prefix: prefix, content: content, lnb: lnb} | rest], prefix, result),
@@ -543,36 +544,36 @@ defmodule Earmark.Block do
   # Helpers #
   ###########
 
+  @spec closes_tag?( Line.t, Line.t ) :: boolean
   defp closes_tag?(%Line.HtmlCloseTag{tag: ctag}, %Line.HtmlOpenTag{tag: otag}), do: ctag == otag
   defp closes_tag?(_, _), do: false
 
+  @spec opens_tag?( Line.t ) :: boolean
   defp opens_tag?(%Line.HtmlOpenTag{}), do: true
   defp opens_tag?(_), do: false
 
 
-  # (_,{'nil' | binary(),number()}) -> #{}jj
-#  @spec inline_or_text?( Line.t, inline_code_continuation ) :: %{pending: String.t, continue: boolean}
+  @spec inline_or_text?( t, inline_code_continuation ) :: {inline_code_continuation, boolean}
   defp inline_or_text?(line, pending)
   defp inline_or_text?(line = %Line.Text{}, @not_pending) do
-    pending = opens_inline_code(line)
-    %{pending: pending, continue: true}
+    {opens_inline_code(line), true}
   end
   defp inline_or_text?(line = %Line.TableLine{}, @not_pending) do
-    pending = opens_inline_code(line)
-    %{pending: pending, continue: true}
+    {opens_inline_code(line), true}
   end
-  defp inline_or_text?( _line, @not_pending), do: %{pending: @not_pending, continue: false}
+  defp inline_or_text?( _line, @not_pending), do: {@not_pending, false}
   defp inline_or_text?( line, pending ) do
-    pending = still_inline_code(line, pending)
-    %{pending: pending, continue: true}
+    {still_inline_code(line, pending), true}
   end
 
 
+  @spec peek(list(map), atom, atom) :: boolean 
   defp peek([], _, _), do: false
   defp peek([head | _], struct, type) do
     head.__struct__ == struct && head.type == type
   end
 
+  @spec extract_start( t ) :: String.t
   defp extract_start(%{bullet: "1."}), do: ""
   defp extract_start(%{bullet: bullet}) do
     case Regex.run(~r{^(\d+)\.}, bullet) do
@@ -581,6 +582,7 @@ defmodule Earmark.Block do
     end
   end
 
+  @spec remove_trailing_blank_lines( ts ) :: ts
   defp remove_trailing_blank_lines(lines) do
     lines
     |> Enum.reverse

@@ -20,7 +20,8 @@ defmodule Earmark.Types do
       @type tokens :: list(token)
 
       @type numbered_line :: %{required(:line) => String.t, required(:lnb) => number, optional(:inside_code) => String.t}
-      @type numbered_line_tuple :: {String.t, non_neg_integer()}
+      @type numbered_line_tuple  :: {String.t, non_neg_integer()}
+      @type numbered_line_tuples :: list(numbered_line_tuple)
 
       @type message_type :: :warning | :error
       @type message :: {message_type, number, String.t}
