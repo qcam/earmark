@@ -1,5 +1,8 @@
 defmodule Earmark.CLI do
 
+  alias Earmark.Options
+
+  @spec main( list(String.t) ) :: atom
   def main(argv) do
     argv
     |> parse_args
@@ -22,6 +25,7 @@ defmodule Earmark.CLI do
 
   @cli_options [:code_class_prefix, :gfm, :smartypants, :pedantic, :breaks]
 
+  @spec parse_args( list(String.t) ) :: atom | {pid, Options.t} | {atom, Options.t}
   defp parse_args(argv) do
     switches = [
       help: :boolean,
@@ -42,6 +46,7 @@ defmodule Earmark.CLI do
   end
 
 
+  @spec process( atom | {pid, Options.t} ) :: atom 
   defp process(:help) do
     IO.puts(:stderr, @args)
     IO.puts(:stderr, option_related_help())
@@ -52,18 +57,20 @@ defmodule Earmark.CLI do
   end
 
   defp process({io_device, options}) do
-    options = struct(Earmark.Options, booleanify(options))
+    options = struct(Options, booleanify(options))
     content = IO.stream(io_device, :line) |> Enum.to_list
     Earmark.as_html!(content, options)
     |> IO.puts
   end
 
 
-
+  @spec booleanify( Keyword.t ) :: Keyword.t
   defp booleanify( keywords ), do: Enum.map(keywords, &booleanify_option/1)
+
+  @spec booleanify_option( {atom, atom} ) :: {atom, boolean}
   defp booleanify_option({k, v}) do
     {k,
-     case Map.get %Earmark.Options{}, k, :does_not_exist do
+     case Map.get %Options{}, k, :does_not_exist do
         true  -> if v == "false", do: false, else: true
         false -> if v == "false", do: false, else: true
         :does_not_exist ->
@@ -74,22 +81,26 @@ defmodule Earmark.CLI do
     }
   end
 
+  @spec open_file( String.t) :: pid
   defp open_file(filename), do: io_device(File.open(filename, [:utf8]), filename)
 
+  @spec io_device( {:ok, pid | {:error,String.t}}, String.t ) :: pid()
   defp io_device({:ok, io_device}, _), do: io_device
   defp io_device({:error, reason}, filename) do
     IO.puts(:stderr, "#{filename}: #{:file.format_error(reason)}")
     exit(1)
   end
 
+  @spec option_related_help() :: String.t
   defp option_related_help do
     @cli_options
     |> Enum.map(&specific_option_help/1)
     |> Enum.join("\n")
   end
 
+  @spec specific_option_help( String.t ) :: String.t
   defp specific_option_help( option ) do
-    "      --#{option} defaults to #{inspect(Map.get(%Earmark.Options{}, option))}"
+    "      --#{option} defaults to #{inspect(Map.get(%Options{}, option))}"
   end
 
 end
