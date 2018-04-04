@@ -6,6 +6,8 @@ defmodule Earmark.Helpers.LinkParser do
   import Earmark.Helpers.YeccHelpers, only: [parse!: 2]
   import Earmark.Helpers.StringHelpers, only: [behead: 2]
 
+  @typep beheader_t :: String.t | pair( non_neg_integer )
+
   # Hopfully this will go away in v1.3
   # **********************************
   #
@@ -106,8 +108,10 @@ defmodule Earmark.Helpers.LinkParser do
   end
 
   defp add({parsed_text, url_text, nil}, text), do: {[text|parsed_text], [text|url_text], nil}
+
   defp add_title({parsed_text, url_text, _}, {parsed,inner,messages}), do: {[parsed|parsed_text], url_text, inner, messages}
 
+  @spec list_to_text( list ) :: String.t
   defp list_to_text(lst), do: lst |> Enum.reverse() |> Enum.join("")
 end
 
