@@ -7,7 +7,7 @@ defmodule Earmark.Helpers.AttrParser do
 
   @typep errorlist :: list(String.t)
 
-  @spec parse_attrs(Options.t, String.t, non_neg_integer) :: {Options.t, map()}
+  @spec parse_attrs(Options.t, String.t, non_neg_integer) :: {Earmark.Message.container_type, map()}
   def parse_attrs(context, attrs, lnb) do
     { attrs, errors } = _parse_attrs(%{}, attrs, [], lnb)
     { add_errors(context, errors, lnb), attrs }

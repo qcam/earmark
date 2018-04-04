@@ -27,7 +27,7 @@ defmodule Earmark.HtmlRenderer do
   #############
   defp render_block(%Block.Para{lnb: lnb, lines: lines, attrs: attrs}, context) do
     lines = convert(lines, lnb, context)
-    add_attrs!(lines, "<p>#{lines.value}</p>\n", attrs, [], lnb)
+    add_attrs(lines, "<p>#{lines.value}</p>\n", attrs, [], lnb)
   end
 
   ########
@@ -45,15 +45,15 @@ defmodule Earmark.HtmlRenderer do
   # Ruler #
   #########
   defp render_block(%Block.Ruler{lnb: lnb, type: "-", attrs: attrs}, context) do
-    add_attrs!(context, "<hr/>\n", attrs, [{"class", ["thin"]}], lnb)
+    add_attrs(context, "<hr/>\n", attrs, [{"class", ["thin"]}], lnb)
   end
 
   defp render_block(%Block.Ruler{lnb: lnb, type: "_", attrs: attrs}, context) do
-    add_attrs!(context, "<hr/>\n", attrs, [{"class", ["medium"]}], lnb)
+    add_attrs(context, "<hr/>\n", attrs, [{"class", ["medium"]}], lnb)
   end
 
   defp render_block(%Block.Ruler{lnb: lnb, type: "*", attrs: attrs}, context) do
-    add_attrs!(context, "<hr/>\n", attrs, [{"class", ["thick"]}], lnb)
+    add_attrs(context, "<hr/>\n", attrs, [{"class", ["thick"]}], lnb)
   end
 
   ###########
@@ -62,7 +62,7 @@ defmodule Earmark.HtmlRenderer do
   defp render_block(%Block.Heading{lnb: lnb, level: level, content: content, attrs: attrs}, context) do
     converted = convert(content, lnb, context)
     html = "<h#{level}>#{converted.value}</h#{level}>\n"
-    add_attrs!(converted, html, attrs, [], lnb)
+    add_attrs(converted, html, attrs, [], lnb)
   end
 
   ##############
@@ -72,7 +72,7 @@ defmodule Earmark.HtmlRenderer do
   defp render_block(%Block.BlockQuote{lnb: lnb, blocks: blocks, attrs: attrs}, context) do
     {context1, body} = render(blocks, context)
     html = "<blockquote>#{body}</blockquote>\n"
-    add_attrs!(context1, html, attrs, [], lnb)
+    add_attrs(context1, html, attrs, [], lnb)
   end
 
   #########
@@ -81,7 +81,7 @@ defmodule Earmark.HtmlRenderer do
 
   defp render_block(%Block.Table{lnb: lnb, header: header, rows: rows, alignments: aligns, attrs: attrs}, context) do
     cols = for _align <- aligns, do: "<col>\n"
-    {context1, html} = add_attrs!(context, "<table>\n", attrs, [], lnb)
+    {context1, html} = add_attrs(context, "<table>\n", attrs, [], lnb)
     html = [ html , "<colgroup>\n", cols, "</colgroup>\n" ]
     context2 = set_value( context1, html )
 
@@ -106,7 +106,7 @@ defmodule Earmark.HtmlRenderer do
     tag = ~s[<pre><code#{class}>]
     lines = options.render_code.(block)
     html = ~s[#{tag}#{lines}</code></pre>\n]
-    add_attrs!(context, html, attrs, [], lnb)
+    add_attrs(context, html, attrs, [], lnb)
   end
 
   #########
@@ -116,7 +116,7 @@ defmodule Earmark.HtmlRenderer do
   defp render_block(%Block.List{lnb: lnb, type: type, blocks: items, attrs: attrs, start: start}, context) do
     {context1, content} = render(items, context)
     html = "<#{type}#{start}>\n#{content}</#{type}>\n"
-    add_attrs!(context1, html, attrs, [], lnb)
+    add_attrs(context1, html, attrs, [], lnb)
   end
 
   # format a single paragraph list item, and remove the para tags
@@ -125,14 +125,14 @@ defmodule Earmark.HtmlRenderer do
     {context1, content} = render(blocks, context)
     content = Regex.replace(~r{</?p>}, content, "")
     html = "<li>#{content}</li>\n"
-    add_attrs!(context1, html, attrs, [], lnb)
+    add_attrs(context1, html, attrs, [], lnb)
   end
 
   # format a spaced list item
   defp render_block(%Block.ListItem{lnb: lnb, blocks: blocks, attrs: attrs}, context) do
     {context1, content} = render(blocks, context)
     html = "<li>#{content}</li>\n"
-    add_attrs!(context1, html, attrs, [], lnb)
+    add_attrs(context1, html, attrs, [], lnb)
   end
 
   ##################
