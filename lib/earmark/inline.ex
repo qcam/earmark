@@ -305,8 +305,10 @@
   end
 
 
+  @spec is_image?( {String.t, any, any, any} | {String.t, any, any, any, any} ) :: boolean
   defp is_image?( {match_text, _, _, _} ), do: String.starts_with?(match_text, "!")
   defp is_image?( {match_text, _, _, _, _} ), do: String.starts_with?(match_text, "!")
+
   @trailing_newlines ~r{\n*\z}
 
   defp update_lnb(data = {_, _, %{value: []}, _}), do: data
