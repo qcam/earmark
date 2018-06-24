@@ -9,7 +9,7 @@ defmodule Earmark.Helpers.LinkParser do
   import Earmark.Helpers.StringHelpers, only: [behead: 2]
 
   @typep beheader_t       :: String.t | pair( non_neg_integer )
-  @typep parsed_tuple     :: maybe(triplet(String.t) | {String.t, String.t, String.t, Message.ts})
+  @typep parsed_tuple     :: nil | triplet(String.t) | {String.t, String.t, String.t, Message.ts} | nil_tagged_parse
   @typep result_tuple     :: maybe({String.t, String.t, String.t, String.t} | {String.t, String.t, String.t, String.t, Message.ts})
   @typep link_with_title  :: {list(String.t), list(String.t), String.t, Message.ts}
   @typep nil_tagged_parse :: { list(String.t), list(String.t), nil }
@@ -114,7 +114,9 @@ defmodule Earmark.Helpers.LinkParser do
     [ {:warning, lnb, "deprecated, mismatching quotes will not be parsed as matching in v1.3"} ]
   end
 
-  @spec make_result( parsed_tuple, String.t, String.t ) :: result_tuple
+  # @spec make_result( parsed_tuple, String.t, String.t ) :: result_tuple
+  # @spec make_result( {[binary()],[binary()],nil} | {[binary()],[binary()],nil,[]},binary(),binary()) :: result_tuple
+
   defp make_result(nil, _, _), do: nil
   defp make_result({parsed, url, title}, text, img), do: make_result({parsed, url, title, []}, text, img)
   defp make_result({parsed, url, title, messages}, link_text, "!" <> _) do
